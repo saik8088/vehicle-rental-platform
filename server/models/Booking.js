@@ -38,6 +38,12 @@ const bookingSchema = new mongoose.Schema({
     enum: ['pending', 'paid', 'refunded'],
     default: 'pending'
   },
+  razorpayOrderId: {
+    type: String
+  },
+  razorpayPaymentId: {
+    type: String
+  },
   createdAt: {
     type: Date,
     default: Date.now

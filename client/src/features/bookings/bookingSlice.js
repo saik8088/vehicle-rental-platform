@@ -43,6 +43,40 @@ export const createBooking = createAsyncThunk(
   }
 );
 
+// Cancel booking
+export const cancelBooking = createAsyncThunk(
+  'bookings/cancel',
+  async (id, thunkAPI) => {
+    try {
+      const response = await api.put(`/bookings/${id}`, { status: 'cancelled' });
+      return response.data.data;
+    } catch (error) {
+      const message =
+        (error.response && error.response.data && error.response.data.error) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Complete booking (early finish by user)
+export const completeBooking = createAsyncThunk(
+  'bookings/complete',
+  async (id, thunkAPI) => {
+    try {
+      const response = await api.put(`/bookings/${id}`, { status: 'completed' });
+      return response.data.data;
+    } catch (error) {
+      const message =
+        (error.response && error.response.data && error.response.data.error) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 export const bookingSlice = createSlice({
   name: 'booking',
   initialState,
@@ -56,9 +90,7 @@ export const bookingSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(getBookings.pending, (state) => {
-        state.isLoading = true;
-      })
+      .addCase(getBookings.pending, (state) => { state.isLoading = true; })
       .addCase(getBookings.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
@@ -69,15 +101,37 @@ export const bookingSlice = createSlice({
         state.isError = true;
         state.message = action.payload;
       })
-      .addCase(createBooking.pending, (state) => {
-        state.isLoading = true;
-      })
+      .addCase(createBooking.pending, (state) => { state.isLoading = true; })
       .addCase(createBooking.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.bookings.push(action.payload);
       })
       .addCase(createBooking.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      .addCase(cancelBooking.pending, (state) => { state.isLoading = true; })
+      .addCase(cancelBooking.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        const index = state.bookings.findIndex(b => b._id === action.payload._id);
+        if (index !== -1) state.bookings[index] = action.payload;
+      })
+      .addCase(cancelBooking.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      .addCase(completeBooking.pending, (state) => { state.isLoading = true; })
+      .addCase(completeBooking.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        const index = state.bookings.findIndex(b => b._id === action.payload._id);
+        if (index !== -1) state.bookings[index] = action.payload;
+      })
+      .addCase(completeBooking.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;

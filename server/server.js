@@ -13,7 +13,8 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors());
 
 // Logging middleware in dev mode
@@ -27,6 +28,7 @@ const vehicleRoutes = require('./routes/vehicles');
 const bookingRoutes = require('./routes/bookings');
 const userRoutes = require('./routes/users');
 const notificationRoutes = require('./routes/notifications');
+const paymentRoutes = require('./routes/payments');
 const errorHandler = require('./middleware/error');
 
 
@@ -41,6 +43,7 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Error handler middleware
 app.use(errorHandler);

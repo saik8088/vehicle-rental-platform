@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { HiStar, HiMapPin } from 'react-icons/hi2';
+import { HiMapPin } from 'react-icons/hi2';
 import { Badge } from '../common';
 
 const VehicleCard = ({ vehicle }) => {
@@ -13,8 +13,6 @@ const VehicleCard = ({ vehicle }) => {
     pricePerDay,
     location,
     images,
-    averageRating,
-    reviewCount,
     isAvailable,
   } = vehicle;
 
@@ -43,14 +41,7 @@ const VehicleCard = ({ vehicle }) => {
           </Badge>
         </div>
         
-        {/* Rating Overlay */}
-        {averageRating > 0 && (
-          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg shadow-sm flex items-center gap-1">
-            <HiStar className="w-3.5 h-3.5 text-warning-500" />
-            <span className="text-caption font-bold text-surface-900">{averageRating}</span>
-            <span className="text-[0.625rem] text-surface-500">({reviewCount})</span>
-          </div>
-        )}
+
       </div>
 
       {/* Content Container */}

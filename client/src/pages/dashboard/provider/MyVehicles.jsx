@@ -2,31 +2,38 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTrash } from 'react-icons/hi2';
+import { toast } from 'react-hot-toast';
 import { Button, Badge } from '../../../components/common';
-import { getVehicles } from '../../../features/vehicles/vehicleSlice';
+import { getMyVehicles, updateVehicle, deleteVehicle } from '../../../features/vehicles/vehicleSlice';
 
 const MyVehicles = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { vehicles, isLoading } = useSelector((state) => state.vehicle);
-  const { user } = useSelector((state) => state.auth);
+  const { myVehicles, isLoading } = useSelector((state) => state.vehicle);
 
   useEffect(() => {
-    dispatch(getVehicles());
+    dispatch(getMyVehicles());
   }, [dispatch]);
 
-  const myVehicles = vehicles.filter(v => v.provider?._id === user?._id || v.provider === user?._id);
-
-  const toggleAvailability = (id) => {
-    // To be implemented: dispatch updateVehicle
-    console.log('Toggle availability for', id);
+  const toggleAvailability = async (id, currentStatus) => {
+    try {
+      await dispatch(updateVehicle({ id, data: { isAvailable: !currentStatus } })).unwrap();
+      toast.success(`Vehicle ${!currentStatus ? 'activated' : 'taken offline'}`);
+      dispatch(getMyVehicles());
+    } catch (err) {
+      toast.error(err || 'Failed to update');
+    }
   };
 
-  const deleteVehicleHandler = (id) => {
+  const deleteVehicleHandler = async (id) => {
     if (window.confirm('Are you sure you want to remove this vehicle?')) {
-      // To be implemented: dispatch deleteVehicle
-      console.log('Delete vehicle', id);
+      try {
+        await dispatch(deleteVehicle(id)).unwrap();
+        toast.success('Vehicle deleted');
+      } catch (err) {
+        toast.error(err || 'Failed to delete');
+      }
     }
   };
 
@@ -81,7 +88,7 @@ const MyVehicles = () => {
               <div className="flex items-center justify-between bg-surface-50 p-3 rounded-xl mb-4">
                 <span className="text-body-sm font-medium text-surface-700">Availability</span>
                 <button 
-                  onClick={() => toggleAvailability(vehicle._id)}
+                  onClick={() => toggleAvailability(vehicle._id, vehicle.isAvailable)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-ring ${
                     vehicle.isAvailable ? 'bg-primary-600' : 'bg-surface-300'
                   }`}

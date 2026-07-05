@@ -4,23 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { HiMagnifyingGlass, HiCalendarDays, HiMapPin, HiShieldCheck, HiCreditCard, HiCheckBadge } from 'react-icons/hi2';
 import { Button } from '../../components/common';
 import { VehicleCard } from '../../components/vehicles';
-import { ReviewCard } from '../../components/reviews';
 import { getVehicles } from '../../features/vehicles/vehicleSlice';
-
-const popularLocations = [
-  { id: 1, name: 'Mumbai', vehicleCount: 120, image: '🏛️' },
-  { id: 2, name: 'Bengaluru', vehicleCount: 85, image: '💻' },
-  { id: 3, name: 'Delhi NCR', vehicleCount: 150, image: '🏰' },
-  { id: 4, name: 'Goa', vehicleCount: 60, image: '🏖️' },
-  { id: 5, name: 'Pune', vehicleCount: 45, image: '⛰️' },
-  { id: 6, name: 'Hyderabad', vehicleCount: 75, image: '🕌' }
-];
-
-const tempTestimonials = [
-  { id: 1, name: 'Rahul Sharma', role: 'Customer', content: 'Booked a Honda City for my weekend getaway. The process was incredibly smooth and the car was in perfect condition.', rating: 5, avatar: 'https://ui-avatars.com/api/?name=Rahul+Sharma&background=random' },
-  { id: 2, name: 'Priya Patel', role: 'Vehicle Owner', content: 'Listing my unused car on RideEasy has been a great source of passive income. The platform handles everything securely.', rating: 5, avatar: 'https://ui-avatars.com/api/?name=Priya+Patel&background=random' },
-  { id: 3, name: 'Amit Kumar', role: 'Customer', content: 'The best car rental experience I\'ve had. Transparent pricing and the host was very accommodating.', rating: 4, avatar: 'https://ui-avatars.com/api/?name=Amit+Kumar&background=random' }
-];
 import heroBanner from '../../assets/hero-banner.png';
 
 const Home = () => {
@@ -81,7 +65,7 @@ const Home = () => {
                 </div>
                 <input
                   type="text"
-                  placeholder="Where are you going?"
+                  placeholder="Your location"
                   className="w-full pl-12 pr-4 py-3.5 bg-surface-50 border border-transparent hover:border-surface-200 focus:border-primary-500 focus:bg-white rounded-2xl text-body transition-colors focus-ring"
                   value={searchParams.location}
                   onChange={(e) => setSearchParams({ ...searchParams, location: e.target.value })}
@@ -137,7 +121,7 @@ const Home = () => {
           <div className="flex flex-col sm:flex-row justify-between items-end gap-4 mb-10">
             <div>
               <h2 className="text-h2 text-surface-900 mb-2">Featured Vehicles</h2>
-              <p className="text-body text-surface-500">Discover our most popular and highly-rated rentals.</p>
+              <p className="text-body text-surface-500">Discover our most popular rentals available now.</p>
             </div>
             <Button variant="ghost" onClick={() => navigate('/vehicles')}>
               View all vehicles →
@@ -152,31 +136,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Popular Locations */}
-      <section className="section bg-white">
-        <div className="container-app">
-          <div className="text-center mb-12">
-            <h2 className="text-h2 text-surface-900 mb-2">Popular Destinations</h2>
-            <p className="text-body text-surface-500">Rent a vehicle in top cities across India.</p>
-          </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
-            {popularLocations.map((location) => (
-              <button
-                key={location.name}
-                onClick={() => navigate(`/vehicles?location=${location.name}`)}
-                className="group flex flex-col items-center p-6 bg-surface-50 rounded-2xl hover:bg-primary-50 transition-colors focus-ring"
-              >
-                <span className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
-                  {location.image}
-                </span>
-                <h3 className="text-body font-semibold text-surface-900 mb-1">{location.name}</h3>
-                <p className="text-caption text-surface-500">{location.vehicleCount}+ Vehicles</p>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* How it Works / Benefits */}
       <section className="section bg-surface-900 text-surface-200">
@@ -218,21 +178,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="section bg-surface-50">
-        <div className="container-app">
-          <div className="text-center mb-12">
-            <h2 className="text-h2 text-surface-900 mb-2">What Our Users Say</h2>
-            <p className="text-body text-surface-500">Join thousands of satisfied customers and providers.</p>
-          </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {tempTestimonials.map((testimonial) => (
-              <ReviewCard key={testimonial.id} review={testimonial} />
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-20 bg-primary-600 relative overflow-hidden">

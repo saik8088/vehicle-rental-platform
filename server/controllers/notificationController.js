@@ -1,5 +1,14 @@
 const Notification = require('../models/Notification');
 
+// Helper: Create a notification (used by other controllers)
+const createNotification = async (userId, title, message, type = 'info') => {
+  try {
+    await Notification.create({ user: userId, title, message, type });
+  } catch (error) {
+    console.error('Notification creation failed:', error.message);
+  }
+};
+
 // @desc    Get logged in user notifications
 // @route   GET /api/notifications
 // @access  Private
@@ -28,6 +37,7 @@ const markAllAsRead = async (req, res) => {
 };
 
 module.exports = {
+  createNotification,
   getNotifications,
   markAllAsRead,
 };

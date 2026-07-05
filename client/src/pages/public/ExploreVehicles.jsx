@@ -21,11 +21,11 @@ const ExploreVehicles = () => {
   // Form state
   const [filters, setFilters] = useState({
     location: searchParams.get('location') || '',
-    type: searchParams.get('type') || '',
+    type: searchParams.get('type') || 'all',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
-    transmission: searchParams.get('transmission') || '',
-    fuelType: searchParams.get('fuelType') || '',
+    transmission: searchParams.get('transmission') || 'all',
+    fuelType: searchParams.get('fuelType') || 'all',
   });
 
   useEffect(() => {
@@ -33,13 +33,13 @@ const ExploreVehicles = () => {
     if (filters.location) {
       result = result.filter(v => v.location.toLowerCase().includes(filters.location.toLowerCase()));
     }
-    if (filters.type) {
+    if (filters.type && filters.type !== 'all') {
       result = result.filter(v => v.type === filters.type);
     }
-    if (filters.transmission) {
+    if (filters.transmission && filters.transmission !== 'all') {
       result = result.filter(v => v.transmission === filters.transmission);
     }
-    if (filters.fuelType) {
+    if (filters.fuelType && filters.fuelType !== 'all') {
       result = result.filter(v => v.fuelType === filters.fuelType);
     }
     if (filters.minPrice) {
@@ -53,26 +53,18 @@ const ExploreVehicles = () => {
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    const newFilters = { ...filters, [name]: value };
-    setFilters(newFilters);
-    
-    // Update URL
-    const params = new URLSearchParams();
-    Object.entries(newFilters).forEach(([key, val]) => {
-      if (val) params.set(key, val);
-    });
-    setSearchParams(params);
+    setFilters(prev => ({ ...prev, [name]: value }));
   };
 
   const clearFilters = () => {
     const reset = {
-      location: '', type: '', minPrice: '', maxPrice: '', transmission: '', fuelType: ''
+      location: '', type: 'all', minPrice: '', maxPrice: '', transmission: 'all', fuelType: 'all'
     };
     setFilters(reset);
     setSearchParams(new URLSearchParams());
   };
 
-  const FilterContent = () => (
+  const renderFilterContent = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-h6 text-surface-900">Filters</h3>
@@ -99,7 +91,7 @@ const ExploreVehicles = () => {
           value={filters.type}
           onChange={handleFilterChange}
           options={[
-            { label: 'All Types', value: '' },
+            { label: 'All Types', value: 'all' },
             { label: 'Car', value: 'car' },
             { label: 'Bike', value: 'bike' },
             { label: 'Scooter', value: 'scooter' },
@@ -131,7 +123,7 @@ const ExploreVehicles = () => {
           value={filters.transmission}
           onChange={handleFilterChange}
           options={[
-            { label: 'Any', value: '' },
+            { label: 'Any', value: 'all' },
             { label: 'Automatic', value: 'automatic' },
             { label: 'Manual', value: 'manual' },
           ]}
@@ -143,7 +135,7 @@ const ExploreVehicles = () => {
           value={filters.fuelType}
           onChange={handleFilterChange}
           options={[
-            { label: 'Any', value: '' },
+            { label: 'Any', value: 'all' },
             { label: 'Petrol', value: 'petrol' },
             { label: 'Diesel', value: 'diesel' },
             { label: 'Electric', value: 'electric' },
@@ -174,7 +166,7 @@ const ExploreVehicles = () => {
           {/* Desktop Sidebar Filter */}
           <aside className="hidden lg:block w-[300px] flex-shrink-0">
             <div className="sticky top-24 card p-6">
-              <FilterContent />
+              {renderFilterContent()}
             </div>
           </aside>
 
@@ -196,7 +188,7 @@ const ExploreVehicles = () => {
                   </button>
                 </div>
                 <div className="p-4">
-                  <FilterContent />
+                  {renderFilterContent()}
                 </div>
                 <div className="p-4 border-t border-surface-100 mt-auto sticky bottom-0 bg-white">
                   <Button fullWidth onClick={() => setIsFilterOpen(false)}>

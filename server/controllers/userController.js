@@ -43,7 +43,7 @@ const updateUserProfile = async (req, res) => {
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Server Error: Unable to update profile' });
+    res.status(500).json({ message: 'Server Error: Unable to update profile', error: error.message, stack: error.stack });
   }
 };
 

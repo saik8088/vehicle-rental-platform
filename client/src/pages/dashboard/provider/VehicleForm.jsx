@@ -1,14 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { HiOutlinePhoto, HiXMark } from 'react-icons/hi2';
+import { toast } from 'react-hot-toast';
 import { Button, Input, Select, Textarea } from '../../../components/common';
+import { createVehicle, getVehicle, updateVehicle, reset } from '../../../features/vehicles/vehicleSlice';
 
 const VehicleForm = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { id } = useParams();
   const isEditing = Boolean(id);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const { vehicle, isLoading, isSuccess, isError, message } = useSelector((state) => state.vehicle);
+
   const [formData, setFormData] = useState({
     name: '',
     brand: '',
@@ -23,33 +28,118 @@ const VehicleForm = () => {
     features: '',
   });
 
-  const [images, setImages] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]); // File objects for upload
+  const [imagePreviews, setImagePreviews] = useState([]); // preview URLs
+  const [existingImages, setExistingImages] = useState([]); // existing Cloudinary images (edit mode)
+
+  // If editing, fetch vehicle and pre-fill
+  useEffect(() => {
+    if (isEditing) {
+      dispatch(getVehicle(id));
+    }
+  }, [dispatch, id, isEditing]);
+
+  useEffect(() => {
+    if (isEditing && vehicle && vehicle._id === id) {
+      setFormData({
+        name: vehicle.name || '',
+        brand: vehicle.brand || '',
+        type: vehicle.type || 'car',
+        fuelType: vehicle.fuelType || 'petrol',
+        transmission: vehicle.transmission || 'automatic',
+        seats: vehicle.seats || 4,
+        pricePerDay: vehicle.pricePerDay || '',
+        pricePerHour: vehicle.pricePerHour || '',
+        location: vehicle.location || '',
+        description: vehicle.description || '',
+        features: vehicle.features?.join(', ') || '',
+      });
+      setExistingImages(vehicle.images || []);
+    }
+  }, [vehicle, id, isEditing]);
+
+  // Handle success/error
+  useEffect(() => {
+    if (isError) {
+      toast.error(message || 'Something went wrong');
+    }
+    if (isSuccess && (imageFiles.length > 0 || formData.name)) {
+      // Only navigate on create/update success, not on initial getVehicle success
+    }
+    return () => {
+      dispatch(reset());
+    };
+  }, [isError, message, dispatch]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleImageUpload = (e) => {
-    // Mock image upload
     const files = Array.from(e.target.files);
-    if (files.length > 0) {
-      const newImages = files.map(file => URL.createObjectURL(file));
-      setImages([...images, ...newImages].slice(0, 5)); // max 5 images
+    const totalImages = imageFiles.length + existingImages.length;
+    const remaining = 5 - totalImages;
+    
+    if (remaining <= 0) {
+      toast.error('Maximum 5 images allowed');
+      return;
     }
+
+    const newFiles = files.slice(0, remaining);
+    setImageFiles(prev => [...prev, ...newFiles]);
+
+    // Generate previews
+    const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+    setImagePreviews(prev => [...prev, ...newPreviews]);
   };
 
-  const removeImage = (index) => {
-    setImages(images.filter((_, i) => i !== index));
+  const removeNewImage = (index) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e) => {
+  const removeExistingImage = (index) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+
+    if (imageFiles.length === 0 && existingImages.length === 0) {
+      toast.error('Please upload at least one image');
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append('name', formData.name);
+    fd.append('brand', formData.brand);
+    fd.append('type', formData.type);
+    fd.append('fuelType', formData.fuelType);
+    fd.append('transmission', formData.transmission);
+    fd.append('seats', formData.seats);
+    fd.append('pricePerDay', formData.pricePerDay);
+    if (formData.pricePerHour) fd.append('pricePerHour', formData.pricePerHour);
+    fd.append('location', formData.location);
+    fd.append('description', formData.description);
+    fd.append('features', formData.features);
+
+    // Append image files
+    imageFiles.forEach(file => {
+      fd.append('images', file);
+    });
+
+    try {
+      if (isEditing) {
+        await dispatch(updateVehicle({ id, data: fd })).unwrap();
+        toast.success('Vehicle updated successfully!');
+      } else {
+        await dispatch(createVehicle(fd)).unwrap();
+        toast.success('Vehicle listed successfully!');
+      }
       navigate('/dashboard/provider/vehicles');
-    }, 1500);
+    } catch (err) {
+      toast.error(err || 'Failed to save vehicle');
+    }
   };
 
   return (
@@ -198,12 +288,27 @@ const VehicleForm = () => {
               </label>
               
               <div className="flex flex-wrap gap-4 mb-4">
-                {images.map((img, index) => (
-                  <div key={index} className="relative w-24 h-24 rounded-lg overflow-hidden border border-surface-200">
-                    <img src={img} alt="Upload preview" className="w-full h-full object-cover" />
+                {/* Existing images (edit mode) */}
+                {existingImages.map((img, index) => (
+                  <div key={`existing-${index}`} className="relative w-24 h-24 rounded-lg overflow-hidden border border-surface-200">
+                    <img src={img.url} alt="Vehicle" className="w-full h-full object-cover" />
                     <button
                       type="button"
-                      onClick={() => removeImage(index)}
+                      onClick={() => removeExistingImage(index)}
+                      className="absolute top-1 right-1 bg-surface-900/60 text-white rounded-full p-1 hover:bg-error-600 transition-colors"
+                    >
+                      <HiXMark className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+
+                {/* New image previews */}
+                {imagePreviews.map((preview, index) => (
+                  <div key={`new-${index}`} className="relative w-24 h-24 rounded-lg overflow-hidden border border-primary-300">
+                    <img src={preview} alt="Upload preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeNewImage(index)}
                       className="absolute top-1 right-1 bg-surface-900/60 text-white rounded-full p-1 hover:bg-error-600 transition-colors"
                     >
                       <HiXMark className="w-3 h-3" />
@@ -211,7 +316,7 @@ const VehicleForm = () => {
                   </div>
                 ))}
                 
-                {images.length < 5 && (
+                {(imageFiles.length + existingImages.length) < 5 && (
                   <label className="w-24 h-24 rounded-lg border-2 border-dashed border-surface-300 hover:border-primary-500 bg-surface-50 flex flex-col items-center justify-center cursor-pointer transition-colors">
                     <HiOutlinePhoto className="w-6 h-6 text-surface-400 mb-1" />
                     <span className="text-[10px] text-surface-500 font-medium">Add Photo</span>

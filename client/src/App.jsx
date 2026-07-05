@@ -23,10 +23,10 @@ import Register from './pages/auth/Register';
 import { CustomerOverview, MyBookings, ProfileSettings, CustomerNotifications } from './pages/dashboard/customer';
 
 // Provider Dashboard Pages
-import { ProviderOverview, MyVehicles, VehicleForm, Earnings } from './pages/dashboard/provider';
+import { ProviderOverview, MyVehicles, VehicleForm } from './pages/dashboard/provider';
 
 // Admin Dashboard Pages
-import { AdminOverview, ManageUsers, ManageVehicles } from './pages/dashboard/admin';
+import { AdminOverview, ManageUsers, ManageVehicles, Settings } from './pages/dashboard/admin';
 
 // 404
 import NotFound from './pages/NotFound';
@@ -80,7 +80,8 @@ function App() {
           <Route path="vehicles" element={<MyVehicles />} />
           <Route path="vehicles/new" element={<VehicleForm />} />
           <Route path="vehicles/:id/edit" element={<VehicleForm />} />
-          <Route path="earnings" element={<Earnings />} />
+
+          <Route path="notifications" element={<CustomerNotifications />} />
           <Route path="profile" element={<ProfileSettings />} />
         </Route>
 
@@ -89,7 +90,8 @@ function App() {
           <Route index element={<AdminOverview />} />
           <Route path="users" element={<ManageUsers />} />
           <Route path="vehicles" element={<ManageVehicles />} />
-          <Route path="settings" element={<div className="p-8"><h1 className="text-h3 text-surface-900">System Settings</h1><p className="text-surface-500">Coming soon in next phase.</p></div>} />
+          <Route path="notifications" element={<CustomerNotifications />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* 404 fallback */}

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { HiOutlineFunnel } from 'react-icons/hi2';
+import { toast } from 'react-hot-toast';
 import { Badge, Button } from '../../../components/common';
-import { getBookings } from '../../../features/bookings/bookingSlice';
+import { getBookings, cancelBooking, completeBooking } from '../../../features/bookings/bookingSlice';
 
 const MyBookings = () => {
   const [filter, setFilter] = useState('all');
@@ -18,6 +19,30 @@ const MyBookings = () => {
     if (filter === 'all') return true;
     return booking.status === filter;
   });
+
+  const handleCancel = async (id) => {
+    if (window.confirm('Are you sure you want to cancel this booking?')) {
+      try {
+        await dispatch(cancelBooking(id)).unwrap();
+        toast.success('Booking cancelled');
+        dispatch(getBookings());
+      } catch (err) {
+        toast.error(err || 'Failed to cancel');
+      }
+    }
+  };
+
+  const handleComplete = async (id) => {
+    if (window.confirm('Are you sure you want to complete this ride early?')) {
+      try {
+        await dispatch(completeBooking(id)).unwrap();
+        toast.success('Ride completed!');
+        dispatch(getBookings());
+      } catch (err) {
+        toast.error(err || 'Failed to complete');
+      }
+    }
+  };
 
   if (isLoading) {
     return <div className="p-8 text-center text-surface-500">Loading your bookings...</div>;
@@ -64,8 +89,8 @@ const MyBookings = () => {
                 {/* Image */}
                 <div className="w-full md:w-48 h-32 rounded-xl overflow-hidden bg-surface-100 flex-shrink-0">
                   <img 
-                    src={booking.vehicle.images[0]?.url || 'https://via.placeholder.com/400'} 
-                    alt={booking.vehicle.name}
+                    src={booking.vehicle?.images?.[0]?.url || 'https://via.placeholder.com/400?text=Vehicle'} 
+                    alt={booking.vehicle?.name || 'Vehicle'}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -74,8 +99,8 @@ const MyBookings = () => {
                 <div className="flex-1 space-y-3 w-full">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-h5 text-surface-900 mb-1">{booking.vehicle.name}</h3>
-                      <p className="text-body-sm text-surface-500">{booking.vehicle.location}</p>
+                      <h3 className="text-h5 text-surface-900 mb-1">{booking.vehicle?.name || 'Vehicle'}</h3>
+                      <p className="text-body-sm text-surface-500">{booking.vehicle?.location || ''}</p>
                     </div>
                     <Badge 
                       variant={
@@ -93,15 +118,21 @@ const MyBookings = () => {
                     <div>
                       <p className="text-surface-500">Pick-up</p>
                       <p className="font-medium text-surface-900">
-                        {new Date(booking.startDate).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        {new Date(booking.startDate).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                       </p>
                     </div>
                     <div>
                       <p className="text-surface-500">Drop-off</p>
                       <p className="font-medium text-surface-900">
-                        {new Date(booking.endDate).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        {new Date(booking.endDate).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                       </p>
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-caption">
+                    <Badge variant={booking.paymentStatus === 'paid' ? 'success' : 'warning'} className="capitalize">
+                      Payment: {booking.paymentStatus}
+                    </Badge>
                   </div>
                 </div>
 
@@ -109,17 +140,21 @@ const MyBookings = () => {
                 <div className="w-full md:w-auto md:min-w-[140px] flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 pt-4 md:pt-0 border-t md:border-t-0 border-surface-100 md:border-l md:pl-6">
                   <div className="text-left md:text-right">
                     <p className="text-caption text-surface-500">Total Price</p>
-                    <p className="text-h4 text-primary-600">₹{booking.totalPrice.toLocaleString('en-IN')}</p>
+                    <p className="text-h4 text-primary-600">₹{booking.totalPrice?.toLocaleString('en-IN')}</p>
                   </div>
                   
                   {booking.status === 'upcoming' && (
-                    <Button variant="danger" size="sm" className="w-full md:w-auto">Cancel</Button>
-                  )}
-                  {booking.status === 'completed' && (
-                    <Button variant="secondary" size="sm" className="w-full md:w-auto">Review</Button>
+                    <Button variant="danger" size="sm" className="w-full md:w-auto" onClick={() => handleCancel(booking._id)}>
+                      Cancel
+                    </Button>
                   )}
                   {booking.status === 'active' && (
-                    <Button size="sm" className="w-full md:w-auto">Extend</Button>
+                    <Button size="sm" className="w-full md:w-auto" onClick={() => handleComplete(booking._id)}>
+                      Complete Ride
+                    </Button>
+                  )}
+                  {booking.status === 'completed' && (
+                    <Badge variant="success" className="text-xs">Completed ✓</Badge>
                   )}
                 </div>
 

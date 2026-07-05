@@ -80,22 +80,15 @@ const Login = () => {
               required
             />
             
-            <div className="space-y-1">
-              <Input
-                label="Password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-              <div className="flex justify-end pt-1">
-                <Link to="#" className="text-caption text-primary-600 hover:text-primary-700 font-medium">
-                  Forgot password?
-                </Link>
-              </div>
-            </div>
+            <Input
+              label="Password"
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
 
             <Button
               type="submit"

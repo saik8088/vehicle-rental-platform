@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { HiOutlineMagnifyingGlass, HiOutlineFunnel } from 'react-icons/hi2';
+import { HiOutlineMagnifyingGlass, HiOutlineTrash } from 'react-icons/hi2';
+import { toast } from 'react-hot-toast';
 import { Button, Input, Badge } from '../../../components/common';
-import { getVehicles } from '../../../features/vehicles/vehicleSlice';
+import { getVehicles, deleteVehicle } from '../../../features/vehicles/vehicleSlice';
 
 const ManageVehicles = () => {
   const dispatch = useDispatch();
@@ -18,9 +19,15 @@ const ManageVehicles = () => {
     vehicle.provider?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleApproval = (id, status) => {
-    // API call to update status will go here in Phase 6/7
-    console.log(`Update ${id} to ${status}`);
+  const handleDelete = async (id, name) => {
+    if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
+      try {
+        await dispatch(deleteVehicle(id)).unwrap();
+        toast.success('Vehicle deleted');
+      } catch (err) {
+        toast.error(err || 'Failed to delete');
+      }
+    }
   };
 
   return (
@@ -28,13 +35,13 @@ const ManageVehicles = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-h3 text-surface-900">Manage Vehicles</h1>
-          <p className="text-body-sm text-surface-500">Review and approve new vehicle listings.</p>
+          <p className="text-body-sm text-surface-500">View and manage all vehicle listings.</p>
         </div>
       </div>
 
       <div className="card">
         {/* Toolbar */}
-        <div className="p-4 sm:p-6 border-b border-surface-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-surface-100">
           <div className="w-full sm:max-w-md">
             <Input
               name="search"
@@ -45,16 +52,11 @@ const ManageVehicles = () => {
               containerClassName="mb-0"
             />
           </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" leftIcon={<HiOutlineFunnel className="w-5 h-5" />}>
-              Filter
-            </Button>
-          </div>
         </div>
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[900px]">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-surface-50 text-caption text-surface-500 uppercase tracking-wider">
                 <th className="p-4 font-medium">Vehicle</th>
@@ -71,7 +73,7 @@ const ManageVehicles = () => {
                     <div className="flex items-center gap-3">
                       <div className="w-16 h-12 rounded-lg bg-surface-100 overflow-hidden flex-shrink-0">
                         <img 
-                          src={vehicle.images[0]?.url || 'https://via.placeholder.com/100'} 
+                          src={vehicle.images?.[0]?.url || 'https://via.placeholder.com/100'} 
                           alt={vehicle.name} 
                           className="w-full h-full object-cover"
                         />
@@ -86,17 +88,11 @@ const ManageVehicles = () => {
                     {vehicle.provider?.name || 'Unknown'}
                   </td>
                   <td className="p-4 text-body-sm font-medium text-surface-900">
-                    ₹{vehicle.pricePerDay}
+                    ₹{vehicle.pricePerDay?.toLocaleString('en-IN')}
                   </td>
                   <td className="p-4">
-                    <Badge 
-                      variant={
-                        vehicle.approvalStatus === 'approved' ? 'success' : 
-                        vehicle.approvalStatus === 'pending' ? 'warning' : 'error'
-                      } 
-                      className="capitalize"
-                    >
-                      {vehicle.approvalStatus || 'approved'}
+                    <Badge variant={vehicle.isAvailable ? 'success' : 'error'}>
+                      {vehicle.isAvailable ? 'Available' : 'Offline'}
                     </Badge>
                   </td>
                   <td className="p-4 text-right">
@@ -104,25 +100,15 @@ const ManageVehicles = () => {
                       <Button variant="secondary" size="sm" className="px-3" onClick={() => window.open(`/vehicles/${vehicle._id}`, '_blank')}>
                         View
                       </Button>
-                      {(!vehicle.approvalStatus || vehicle.approvalStatus === 'pending') ? (
-                        <>
-                          <Button size="sm" className="px-3 bg-success-600 hover:bg-success-700" onClick={() => handleApproval(vehicle._id, 'approved')}>
-                            Approve
-                          </Button>
-                          <Button variant="danger" size="sm" className="px-3" onClick={() => handleApproval(vehicle._id, 'rejected')}>
-                            Reject
-                          </Button>
-                        </>
-                      ) : (
-                        <Button 
-                          variant="secondary" 
-                          size="sm" 
-                          className={vehicle.approvalStatus === 'approved' ? 'text-error-600 hover:bg-error-50' : 'text-success-600 hover:bg-success-50'}
-                          onClick={() => handleApproval(vehicle._id, vehicle.approvalStatus === 'approved' ? 'pending' : 'approved')}
-                        >
-                          {vehicle.approvalStatus === 'approved' ? 'Suspend' : 'Re-Approve'}
-                        </Button>
-                      )}
+                      <Button 
+                        variant="danger" 
+                        size="sm" 
+                        className="px-3" 
+                        leftIcon={<HiOutlineTrash className="w-4 h-4" />}
+                        onClick={() => handleDelete(vehicle._id, vehicle.name)}
+                      >
+                        Delete
+                      </Button>
                     </div>
                   </td>
                 </tr>

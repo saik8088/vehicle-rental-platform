@@ -107,8 +107,8 @@ const CustomerOverview = () => {
                   </td>
                   <td className="p-4">
                     <p className="text-body-sm text-surface-700">
-                      {new Date(booking.startDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} - 
-                      {new Date(booking.endDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                      {new Date(booking.startDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} - 
+                      {new Date(booking.endDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                     </p>
                   </td>
                   <td className="p-4">

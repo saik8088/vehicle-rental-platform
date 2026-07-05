@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -8,6 +8,7 @@ import {
 } from 'react-icons/hi2';
 import logo from '../../assets/logo.png';
 import Button from '../common/Button';
+import { getNotifications } from '../../features/notifications/notificationSlice';
 import { logout, reset } from '../../features/auth/authSlice';
 
 const Navbar = () => {
@@ -16,6 +17,21 @@ const Navbar = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { notifications } = useSelector((state) => state.notification);
+
+  useEffect(() => {
+    if (user) {
+      dispatch(getNotifications());
+    }
+  }, [dispatch, user]);
+
+  const unreadCount = notifications?.filter(n => !n.isRead).length || 0;
+
+  const notificationPath = user?.role === 'admin' 
+    ? '/dashboard/admin/notifications' 
+    : user?.role === 'provider' 
+    ? '/dashboard/provider/notifications' 
+    : '/dashboard/notifications';
 
   const handleLogout = () => {
     dispatch(logout());
@@ -26,7 +42,6 @@ const Navbar = () => {
   const publicLinks = [
     { to: '/', label: 'Home' },
     { to: '/vehicles', label: 'Explore Vehicles' },
-    { to: '/become-provider', label: 'Become a Provider' },
     { to: '/about', label: 'About' },
   ];
 
@@ -47,7 +62,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex flex-1 items-center justify-center gap-20 px-8">
             {publicLinks.map((link) => (
               <NavLink key={link.to} to={link.to} className={navLinkClasses} end={link.to === '/'}>
                 {link.label}
@@ -61,13 +76,16 @@ const Navbar = () => {
               <>
                 {/* Notifications */}
                 <Link
-                  to="/dashboard/notifications"
+                  to={notificationPath}
                   className="relative p-2 rounded-xl text-surface-500 hover:text-surface-700 hover:bg-surface-100 transition-colors focus-ring"
                   aria-label="Notifications"
                 >
                   <HiBell className="w-5 h-5" />
-                  {/* Notification dot — shown when unread exist */}
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error-500 rounded-full" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-error-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
 
                 {/* Profile Link */}

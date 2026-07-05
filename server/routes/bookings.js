@@ -2,11 +2,14 @@ const express = require('express');
 const {
   getBookings,
   createBooking,
-  updateBooking
+  updateBooking,
+  checkAvailability
 } = require('../controllers/bookings');
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
+
+router.post('/check-availability', checkAvailability);
 
 router
   .route('/')
