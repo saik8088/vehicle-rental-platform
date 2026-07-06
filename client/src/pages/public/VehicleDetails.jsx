@@ -98,8 +98,8 @@ const VehicleDetails = () => {
       setAvailabilityStatus('checking');
       api.post('/bookings/check-availability', {
         vehicleId: vehicle._id,
-        startDate: bookingDates.startDate,
-        endDate: bookingDates.endDate,
+        startDate: new Date(bookingDates.startDate).toISOString(),
+        endDate: new Date(bookingDates.endDate).toISOString(),
       })
       .then((res) => {
         if (res.data.available) {
@@ -186,8 +186,8 @@ const VehicleDetails = () => {
             // 4. Create booking
             const bookingRes = await dispatch(createBooking({
               vehicle: vehicle._id,
-              startDate: bookingDates.startDate,
-              endDate: bookingDates.endDate,
+              startDate: new Date(bookingDates.startDate).toISOString(),
+              endDate: new Date(bookingDates.endDate).toISOString(),
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
             })).unwrap();
