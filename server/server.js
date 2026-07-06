@@ -16,7 +16,7 @@ const app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://rideeasy-xi.vercel.app', 'https://rideeasy-3lvtqvlzz-bhaskar-tech1s-projects.vercel.app'],
+  origin: ['http://localhost:5173', 'https://rideeasy-xi.vercel.app', 'https://rideeasy-rkl3.onrender.com'],
   credentials: true
 }));
 
