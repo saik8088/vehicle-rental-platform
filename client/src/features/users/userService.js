@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../../utils/api';
 
 const API_URL = '/api/users/';
 
@@ -10,7 +10,7 @@ const getUsers = async (token) => {
     },
   };
 
-  const response = await axios.get(API_URL, config);
+  const response = await api.get(API_URL, config);
   return response.data;
 };
 
@@ -22,7 +22,7 @@ const deleteUser = async (userId, token) => {
     },
   };
 
-  const response = await axios.delete(API_URL + userId, config);
+  const response = await api.delete(API_URL + userId, config);
   return response.data;
 };
 

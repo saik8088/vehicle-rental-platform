@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../../utils/api';
 
 const API_URL = '/api/notifications/';
 
@@ -10,7 +10,7 @@ const getNotifications = async (token) => {
     },
   };
 
-  const response = await axios.get(API_URL, config);
+  const response = await api.get(API_URL, config);
   return response.data;
 };
 
@@ -22,7 +22,7 @@ const markAllAsRead = async (token) => {
     },
   };
 
-  const response = await axios.put(API_URL, {}, config);
+  const response = await api.put(API_URL, {}, config);
   return response.data;
 };
 
