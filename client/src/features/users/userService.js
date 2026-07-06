@@ -1,6 +1,6 @@
 import api from '../../utils/api';
 
-const API_URL = '/api/users/';
+const API_URL = '/users/';
 
 // Get all users (Admin only)
 const getUsers = async (token) => {

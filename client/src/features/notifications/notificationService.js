@@ -1,6 +1,6 @@
 import api from '../../utils/api';
 
-const API_URL = '/api/notifications/';
+const API_URL = '/notifications/';
 
 // Get user notifications
 const getNotifications = async (token) => {
