@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { HiMagnifyingGlass, HiCalendarDays, HiMapPin, HiShieldCheck, HiCreditCard, HiCheckBadge } from 'react-icons/hi2';
@@ -29,7 +29,11 @@ const Home = () => {
     navigate(`/vehicles?${query}`);
   };
 
-  const featuredVehicles = vehicles.slice(0, 4);
+  const featuredVehicles = useMemo(() => {
+    if (!vehicles || vehicles.length === 0) return [];
+    const shuffled = [...vehicles].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 4);
+  }, [vehicles]);
 
   return (
     <div className="flex flex-col min-h-screen">

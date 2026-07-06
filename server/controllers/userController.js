@@ -17,7 +17,7 @@ const getAllUsers = async (req, res) => {
 // @access  Private
 const updateUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).select('+password');
 
     if (user) {
       user.name = req.body.name || user.name;
@@ -25,7 +25,13 @@ const updateUserProfile = async (req, res) => {
       user.phone = req.body.phone || user.phone;
 
       if (req.body.password) {
-        // Assuming bcrypt is handled in User model pre-save hook, which it should be based on auth logic
+        if (!req.body.currentPassword) {
+          return res.status(400).json({ error: 'Please provide your current password' });
+        }
+        const isMatch = await user.matchPassword(req.body.currentPassword);
+        if (!isMatch) {
+          return res.status(401).json({ error: 'Incorrect current password' });
+        }
         user.password = req.body.password;
       }
 

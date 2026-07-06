@@ -6,6 +6,7 @@ import { Badge, Button } from '../../../components/common';
 import { getUsers } from '../../../features/users/userSlice';
 import { getVehicles } from '../../../features/vehicles/vehicleSlice';
 import { getBookings } from '../../../features/bookings/bookingSlice';
+import logo from '../../../assets/logo.png';
 
 const AdminOverview = () => {
   const dispatch = useDispatch();
@@ -90,7 +91,8 @@ const AdminOverview = () => {
       </head>
       <body>
         <div class="header">
-          <h1>🚗 RideEasy Platform Report</h1>
+          <img src="${window.location.origin}${logo}" alt="RideEasy" style="height: 40px; margin-bottom: 10px;" />
+          <h1>RideEasy Platform Report</h1>
           <p>Generated on ${reportDate}</p>
         </div>
 

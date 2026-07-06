@@ -48,15 +48,29 @@ const ProfileSettings = () => {
   const handleUpdatePassword = (e) => {
     e.preventDefault();
     if (formData.newPassword !== formData.confirmPassword) {
-      alert('New passwords do not match');
+      toast.error('New passwords do not match');
       return;
     }
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setFormData({ ...formData, currentPassword: '', newPassword: '', confirmPassword: '' });
-      alert('Password updated successfully (Mock)');
-    }, 1000);
+    if (!formData.currentPassword) {
+      toast.error('Please enter your current password');
+      return;
+    }
+
+    dispatch(updateUser({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      currentPassword: formData.currentPassword,
+      password: formData.newPassword
+    }))
+      .unwrap()
+      .then(() => {
+        toast.success('Password updated successfully');
+        setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+      })
+      .catch((error) => {
+        toast.error(error);
+      });
   };
 
   return (

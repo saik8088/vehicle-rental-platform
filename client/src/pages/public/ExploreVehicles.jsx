@@ -5,6 +5,7 @@ import { HiFunnel, HiXMark } from 'react-icons/hi2';
 import { Button, Input, Select, Checkbox, EmptyState } from '../../components/common';
 import { VehicleCard } from '../../components/vehicles';
 import { getVehicles } from '../../features/vehicles/vehicleSlice';
+import VehicleChatbot from '../../components/chat/VehicleChatbot';
 
 const ExploreVehicles = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -147,6 +148,7 @@ const ExploreVehicles = () => {
 
   return (
     <div className="bg-surface-50 min-h-screen">
+      <VehicleChatbot vehicles={vehicles} />
       <div className="container-app py-8">
         
         {/* Mobile Header & Filter Toggle */}
