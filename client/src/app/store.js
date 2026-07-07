@@ -4,6 +4,7 @@ import vehicleReducer from '../features/vehicles/vehicleSlice';
 import bookingReducer from '../features/bookings/bookingSlice';
 import userReducer from '../features/users/userSlice';
 import notificationReducer from '../features/notifications/notificationSlice';
+import settingsReducer from '../features/settings/settingsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export const store = configureStore({
     booking: bookingReducer,
     user: userReducer,
     notification: notificationReducer,
+    settings: settingsReducer,
   },
 });

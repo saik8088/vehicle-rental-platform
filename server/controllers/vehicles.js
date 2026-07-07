@@ -1,5 +1,6 @@
 const Vehicle = require('../models/Vehicle');
 const cloudinary = require('../config/cloudinary');
+const Setting = require('../models/Setting');
 const { createNotification } = require('./notificationController');
 
 // @desc    Get all vehicles (public — only available ones)
@@ -18,8 +19,9 @@ exports.getVehicles = async (req, res, next) => {
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
 
     const filterObj = JSON.parse(queryStr);
-    // Public endpoint only returns available vehicles (no admin approval gate)
+    // Public endpoint only returns available and approved vehicles
     filterObj.isAvailable = true;
+    filterObj.approvalStatus = 'approved';
 
     query = Vehicle.find(filterObj).populate({
       path: 'provider',
@@ -114,8 +116,8 @@ exports.createVehicle = async (req, res, next) => {
     }
 
     req.body.images = images;
-    // No approval gate — vehicles go live immediately
-    req.body.approvalStatus = 'approved';
+    const settings = await Setting.findOne();
+    req.body.approvalStatus = (settings && settings.autoApproveVehicles) ? 'approved' : 'pending';
 
     const vehicle = await Vehicle.create(req.body);
 

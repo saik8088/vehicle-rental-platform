@@ -14,6 +14,7 @@ import {
 import { Button, Input, Badge, EmptyState } from '../../components/common';
 import { getVehicle } from '../../features/vehicles/vehicleSlice';
 import { createBooking } from '../../features/bookings/bookingSlice';
+import { getSettings } from '../../features/settings/settingsSlice';
 import api from '../../utils/api';
 
 const VehicleDetails = () => {
@@ -26,10 +27,14 @@ const VehicleDetails = () => {
 
   const { vehicle, isLoading } = useSelector((state) => state.vehicle);
   const { user } = useSelector((state) => state.auth);
+  const { settings } = useSelector((state) => state.settings);
 
   useEffect(() => {
     dispatch(getVehicle(id));
-  }, [dispatch, id]);
+    if (!settings) {
+      dispatch(getSettings());
+    }
+  }, [dispatch, id, settings]);
 
   const [bookingDates, setBookingDates] = useState({
     startDate: '',
@@ -80,7 +85,8 @@ const VehicleDetails = () => {
   };
 
   const { totalHours, days, hours, subtotal } = calculateDurationAndPrice();
-  const serviceFee = subtotal > 0 ? Math.round(subtotal * 0.05) : 0; // 5% service fee
+  const feePercentage = settings?.platformFee ?? 5;
+  const serviceFee = subtotal > 0 ? Math.round(subtotal * (feePercentage / 100)) : 0;
   const totalPrice = subtotal + serviceFee;
 
   // Check availability when dates change
@@ -526,7 +532,7 @@ const VehicleDetails = () => {
                         <span>₹{subtotal.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between text-body-sm text-surface-600">
-                        <span>Service Fee (5%)</span>
+                        <span>Service Fee ({feePercentage}%)</span>
                         <span>₹{serviceFee.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="border-t border-surface-200 pt-3 flex justify-between font-bold text-surface-900">

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Setting = require('../models/Setting');
 const jwt = require('jsonwebtoken');
 
 // Generate JWT
@@ -31,6 +32,12 @@ const sendTokenResponse = (user, statusCode, res) => {
 exports.register = async (req, res, next) => {
   try {
     const { name, email, password, role, phone } = req.body;
+
+    // Check settings
+    let settings = await Setting.findOne();
+    if (settings && !settings.enableRegistration) {
+      return res.status(403).json({ success: false, error: 'New user registrations are currently disabled by the administrator.' });
+    }
 
     // Create user
     const user = await User.create({

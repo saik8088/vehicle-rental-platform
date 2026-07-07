@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const Vehicle = require('../models/Vehicle');
+const Setting = require('../models/Setting');
 const { createNotification } = require('./notificationController');
 
 // @desc    Get all bookings (role-based)
@@ -101,6 +102,12 @@ exports.checkAvailability = async (req, res, next) => {
 // @access  Private (Customer)
 exports.createBooking = async (req, res, next) => {
   try {
+    // Check maintenance mode
+    const settings = await Setting.findOne();
+    if (settings && settings.maintenanceMode) {
+      return res.status(503).json({ success: false, error: 'The platform is currently in maintenance mode. Booking is temporarily disabled.' });
+    }
+
     req.body.customer = req.user.id;
 
     const vehicle = await Vehicle.findById(req.body.vehicle);
@@ -146,7 +153,8 @@ exports.createBooking = async (req, res, next) => {
           }
         }
       }
-      const serviceFee = Math.round(subtotal * 0.05);
+      const feePercentage = settings ? settings.platformFee : 5;
+      const serviceFee = Math.round(subtotal * (feePercentage / 100));
       totalPrice = Math.round(subtotal + serviceFee);
     }
 

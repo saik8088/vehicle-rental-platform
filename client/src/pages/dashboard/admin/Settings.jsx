@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { HiOutlineCog, HiOutlineShieldCheck, HiOutlineGlobeAlt, HiOutlineCurrencyRupee } from 'react-icons/hi2';
 import { Button, Input } from '../../../components/common';
 import { toast } from 'react-hot-toast';
+import { getSettings, updateSettings } from '../../../features/settings/settingsSlice';
 
 const Settings = () => {
-  const [isSaving, setIsSaving] = useState(false);
+  const dispatch = useDispatch();
+  const { settings: globalSettings, isLoading } = useSelector((state) => state.settings);
+
   const [settings, setSettings] = useState({
     platformFee: 5,
     enableRegistration: true,
@@ -12,6 +16,22 @@ const Settings = () => {
     contactEmail: 'support@rideeasy.com',
     autoApproveVehicles: true,
   });
+
+  useEffect(() => {
+    dispatch(getSettings());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (globalSettings) {
+      setSettings({
+        platformFee: globalSettings.platformFee ?? 5,
+        enableRegistration: globalSettings.enableRegistration ?? true,
+        maintenanceMode: globalSettings.maintenanceMode ?? false,
+        contactEmail: globalSettings.contactEmail ?? 'support@rideeasy.com',
+        autoApproveVehicles: globalSettings.autoApproveVehicles ?? true,
+      });
+    }
+  }, [globalSettings]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -21,14 +41,14 @@ const Settings = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSaving(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      await dispatch(updateSettings(settings)).unwrap();
       toast.success('System settings updated successfully!');
-    }, 1000);
+    } catch (err) {
+      toast.error(err || 'Failed to update settings');
+    }
   };
 
   return (
@@ -141,7 +161,7 @@ const Settings = () => {
         </div>
 
         <div className="flex justify-end pt-4">
-          <Button type="submit" size="lg" isLoading={isSaving} leftIcon={<HiOutlineCog />}>
+          <Button type="submit" size="lg" isLoading={isLoading} leftIcon={<HiOutlineCog />}>
             Save Configuration
           </Button>
         </div>
